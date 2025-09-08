@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Prompts para Divulgación Científica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-card: #252525;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --accent: #4a8fe7;
+            --accent-hover: #3a7ad7;
+            --success: #28a745;
+            --border: #333;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(33, 83, 150, 0.1) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(33, 83, 150, 0.1) 0%, transparent 25%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .content {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .form-section, .results-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(74, 143, 231, 0.2);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-copy {
+            background-color: var(--success);
+            margin-top: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .prompt-card {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            padding: 0;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-content {
+            padding: 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-line;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .card-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .card-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        .card-content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .nav-btn {
+            text-decoration: none;
+            color: var(--accent);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            background-color: rgba(74, 143, 231, 0.1);
+        }
+        
+        .nav-btn:hover {
+            background-color: rgba(74, 143, 231, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: var(--success);
+            color: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2s forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(20px); }
+        }
+        
+        .logo {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h1>Generador de Prompts para Divulgación Científica</h1>
+            <p class="subtitle">Complete el formulario para generar un prompt personalizado para su curso de marketing digital y divulgación científica</p>
+        </header>
+        
+        <div class="content">
+            <section class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-edit"></i>
+                    Formulario de Personalización
+                </h2>
+                <form id="promptForm">
+                    <div class="form-group">
+                        <label for="areaPrincipal"><i class="fas fa-atom"></i> Área principal del curso</label>
+                        <input type="text" id="areaPrincipal" placeholder="Ej: tecnología, salud, sostenibilidad" value="tecnología">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nivelConocimiento"><i class="fas fa-graduation-cap"></i> Nivel de conocimiento</label>
+                        <select id="nivelConocimiento">
+                            <option value="principiante">Principiante</option>
+                            <option value="intermedio" selected>Intermedio</option>
+                            <option value="avanzado">Avanzado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duracion"><i class="fas fa-calendar-alt"></i> Duración total del curso</label>
+                        <input type="text" id="duracion" placeholder="Ej: 3 meses, 12 semanas" value="6 módulos">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="componentesPracticos"><i class="fas fa-tasks"></i> Componentes prácticos</label>
+                        <textarea id="componentesPracticos" placeholder="Ej: talleres, estudios de caso">talleres prácticos, estudios de caso y ejercicios de aplicación real</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="herramientas"><i class="fas fa-tools"></i> Herramientas o plataformas</label>
+                        <input type="text" id="herramientas" placeholder="Ej: Google Analytics, redes sociales" value="Google Analytics, Meta Business Suite, Canva">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="audiencia"><i class="fas fa-users"></i> Audiencias específicas</label>
+                        <input type="text" id="audiencia" placeholder="Ej: académicos, emprendedores" value="investigadores, académicos y profesionales de la divulgación científica">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="aspectosEticos"><i class="fas fa-balance-scale"></i> Aspectos éticos o normativos</label>
+                        <textarea id="aspectosEticos" placeholder="Ej: protección de datos, regulaciones">protección de datos, regulaciones de publicidad en redes sociales, ética en la comunicación científica</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="metodologias"><i class="fas fa-chalkboard-teacher"></i> Metodologías pedagógicas</label>
+                        <input type="text" id="metodologias" placeholder="Ej: aprendizaje colaborativo, flipped classroom" value="aprendizaje colaborativo, flipped classroom y aprendizaje basado en proyectos">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recursos"><i class="fas fa-book"></i> Recursos adicionales</label>
+                        <textarea id="recursos" placeholder="Ej: lecturas, plantillas, ejemplos">lecturas complementarias, plantillas de planificación, ejemplos de campañas exitosas y guías de mejores prácticas</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="habilidades"><i class="fas fa-brain"></i> Habilidades prioritarias</label>
+                        <select id="habilidades">
+                            <option value="técnicas">Habilidades técnicas</option>
+                            <option value="comunicación">Habilidades de comunicación</option>
+                            <option value="ambas" selected>Ambas por igual</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" id="generateBtn">
+                        <i class="fas fa-magic"></i>
+                        Generar Prompt Completo
+                    </button>
+                </form>
+            </section>
+            
+            <section class="results-section">
+                <h2 class="section-title">
+                    <i class="fas fa-file-alt"></i>
+                    Prompt Generado
+                </h2>
+                <div id="resultsContainer">
+                    <div class="prompt-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-star"></i>
+                                Prompt Completo para Divulgación Científica
+                            </div>
+                        </div>
+                        <div class="card-content" id="fullPrompt">
+                            Complete el formulario y haga clic en "Generar Prompt Completo" para ver el resultado aquí. El prompt generado incluirá todas las secciones combinadas en un solo texto que podrá copiar con un solo clic.
+                        </div>
+                    </div>
+                    
+                    <button class="btn-copy" id="copyBtn">
+                        <i class="fas fa-copy"></i>
+                        Copiar Prompt Completo
+                    </button>
+                    
+                    <div class="navigation">
+                        <a href="#" class="nav-btn" id="backBtn">
+                            <i class="fas fa-arrow-left"></i>
+                            Volver al Inicio
+                        </a>
+                        <a href="#" class="nav-btn" id="nextBtn">
+                            Siguiente Paso
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const fullPromptElement = document.getElementById('fullPrompt');
+            const backBtn = document.getElementById('backBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // Función para mostrar notificación
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 2500);
+            }
+            
+            // Función para copiar texto al portapapeles
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showNotification('Prompt copiado al portapapeles');
+                }).catch(err => {
+                    console.error('Error al copiar texto: ', err);
+                    // Fallback para navegadores antiguos
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('Prompt copiado al portapapeles');
+                });
+            }
+            
+            // Función para generar el prompt completo
+            function generateFullPrompt() {
+                // Obtener valores del formulario
+                const areaPrincipal = document.getElementById('areaPrincipal').value || 'tecnología';
+                const nivelConocimiento = document.getElementById('nivelConocimiento').value || 'intermedio';
+                const duracion = document.getElementById('duracion').value || '6 módulos';
+                const componentesPracticos = document.getElementById('componentesPracticos').value || 'talleres prácticos';
+                const herramientas = document.getElementById('herramientas').value || 'Google Analytics';
+                const audiencia = document.getElementById('audiencia').value || 'profesionales';
+                const aspectosEticos = document.getElementById('aspectosEticos').value || 'protección de datos';
+                const metodologias = document.getElementById('metodologias').value || 'aprendizaje colaborativo';
+                const recursos = document.getElementById('recursos').value || 'lecturas complementarias';
+                const habilidades = document.getElementById('habilidades').value || 'ambas';
+                
+                // Crear el prompt completo
+                const fullPrompt = `ROL
+Eres un ingeniero de prompts especializado en diseño instruccional, marketing digital, divulgación científica y pedagogía.
+
+CONTEXTO
+Necesito estructurar un curso de marketing digital con enfoque en ${areaPrincipal}, dirigido a ${audiencia} que buscan comunicar temas científicos de manera efectiva. Los estudiantes tienen un nivel de conocimiento ${nivelConocimiento}. El curso debe ser modular, sin evaluaciones ni proyectos finales, y priorizar la claridad y practicidad. Debe abordar aspectos como ${aspectosEticos} e incluir ${recursos}.
+
+TAREA
+Estructura Curricular Modular:
+Dividir el curso en módulos temáticos (ej: 6 módulos, uno por mes).
+Cada módulo debe tener: objetivos, contenidos, actividades y evaluación.
+Asignar 12 clases por módulo (3 clases/semana * 4 semanas).Genera una estructura curricular modular con ${duracion}. Para cada módulo, define objetivos, contenidos, actividades y evaluación formativa. Las actividades deben incluir ${componentesPracticos}. El curso debe utilizar herramientas como ${herramientas} y aplicar metodologías como ${metodologias}. El enfoque debe priorizar ${habilidades === 'ambas' ? 'tanto habilidades técnicas como de comunicación' : habilidades === 'técnicas' ? 'habilidades técnicas' : 'habilidades de comunicación'}. Describe cada módulo y clase en párrafos extensos, usando un formato de informe profesional con puntos claros y mínima puntuación.
+
+FORMATO
+Entregar el resultado en forma de reporte de planeación educativa con puntos enumerados y párrafos descriptivos extensos para cada módulo y clase. Evitar signos de puntuación innecesarios y usar lenguaje directo.`;
+
+                // Mostrar el prompt completo
+                fullPromptElement.textContent = fullPrompt;
+                
+                // Hacer scroll suave hacia el resultado
+                document.querySelector('.results-section').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+            
+            // Event listeners
+            generateBtn.addEventListener('click', generateFullPrompt);
+            
+            copyBtn.addEventListener('click', function() {
+                copyToClipboard(fullPromptElement.textContent);
+            });
+            
+            backBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            nextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showNotification('Funcionalidad de siguiente paso en desarrollo');
+            });
+            
+            // Generar un prompt inicial con los valores por defecto
+            generateFullPrompt();
+        });
+    </script>
+</body>
+</html>

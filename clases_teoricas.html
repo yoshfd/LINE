@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Prompts Científicos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-card: #252525;
+            --accent: #4a9cff;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --success: #4caf50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        
+        .form-section {
+            flex: 1;
+            min-width: 300px;
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .results-section {
+            flex: 2;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        
+        .card-title {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+        
+        .copy-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .copy-btn:hover {
+            background: #3a7acc;
+        }
+        
+        .card-content {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .card-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .card-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+        }
+        
+        .card-content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #3a7acc;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: var(--accent);
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-message" id="successMessage">
+        <i class="fas fa-check-circle"></i> Texto copiado al portapapeles
+    </div>
+    
+    <header>
+        <h1><i class="fas fa-microscope"></i> Generador de Prompts Científicos</h1>
+        <p>Complete el formulario para generar prompts personalizados para sus contenidos</p>
+    </header>
+    
+    <div class="container">
+        <section class="form-section">
+            <h2>Formulario de Configuración</h2>
+            <form id="promptForm">
+                <div class="form-group">
+                    <label for="tema">Tema principal:</label>
+                    <input type="text" id="tema" placeholder="Ej: Cambio climático, Inteligencia Artificial..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="publico">Público objetivo:</label>
+                    <select id="publico" required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="estudiantes">Estudiantes</option>
+                        <option value="profesionales">Profesionales</option>
+                        <option value="publico_general">Público general</option>
+                        <option value="academicos">Académicos/investigadores</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tono">Tono del contenido:</label>
+                    <select id="tono" required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="divulgativo">Divulgativo</option>
+                        <option value="formal">Formal/académico</option>
+                        <option value="dinamico">Dinámico y entretenido</option>
+                        <option value="inspirador">Inspirador/motivacional</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duracion">Duración del video (minutos):</label>
+                    <input type="number" id="duracion" min="1" value="5" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="elementosVisuales">Elementos visuales preferidos:</label>
+                    <select id="elementosVisuales" required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="animaciones">Animaciones</option>
+                        <option value="graficos">Gráficos y diagramas</option>
+                        <option value="imagenes_reales">Imágenes reales</option>
+                        <option value="mixto">Combinación de varios</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="plataformas">Plataformas de publicación:</label>
+                    <select id="plataformas" required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="twitter">Twitter</option>
+                        <option value="multiples">Múltiples plataformas</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="palabrasClave">Palabras clave (separadas por comas):</label>
+                    <input type="text" id="palabrasClave" placeholder="Ej: ciencia, tecnología, investigación..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="objetivo">Objetivo principal del contenido:</label>
+                    <textarea id="objetivo" placeholder="¿Qué busca lograr con este contenido?" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Generar Prompts <i class="fas fa-arrow-right"></i></button>
+            </form>
+        </section>
+        
+        <section class="results-section">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Prompt para Video</h3>
+                    <button class="copy-btn" onclick="copyToClipboard('videoPrompt')">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </div>
+                <div class="card-content" id="videoPrompt">
+                    Complete el formulario y haga clic en "Generar Prompts" para ver el resultado aquí.
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Prompt para Post en Redes</h3>
+                    <button class="copy-btn" onclick="copyToClipboard('postPrompt')">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </div>
+                <div class="card-content" id="postPrompt">
+                    Complete el formulario y haga clic en "Generar Prompts" para ver el resultado aquí.
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Metadatos y Hashtags</h3>
+                    <button class="copy-btn" onclick="copyToClipboard('metadataPrompt')">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </div>
+                <div class="card-content" id="metadataPrompt">
+                    Complete el formulario y haga clic en "Generar Prompts" para ver el resultado aquí.
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <div class="navigation">
+        <a href="#" class="nav-btn"><i class="fas fa-arrow-left"></i> Regresar</a>
+        <a href="#" class="nav-btn">Siguiente <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <script>
+        document.getElementById('promptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Obtener valores del formulario
+            const tema = document.getElementById('tema').value;
+            const publico = document.getElementById('publico').value;
+            const tono = document.getElementById('tono').value;
+            const duracion = document.getElementById('duracion').value;
+            const elementosVisuales = document.getElementById('elementosVisuales').value;
+            const plataformas = document.getElementById('plataformas').value;
+            const palabrasClave = document.getElementById('palabrasClave').value;
+            const objetivo = document.getElementById('objetivo').value;
+            
+            // Generar prompts basados en los valores
+            const videoPrompt = generarVideoPrompt(tema, publico, tono, duracion, elementosVisuales, plataformas, palabrasClave, objetivo);
+            const postPrompt = generarPostPrompt(tema, publico, tono, elementosVisuales, plataformas, palabrasClave, objetivo);
+            const metadataPrompt = generarMetadataPrompt(tema, publico, palabrasClave, objetivo);
+            
+            // Mostrar los resultados
+            document.getElementById('videoPrompt').textContent = videoPrompt;
+            document.getElementById('postPrompt').textContent = postPrompt;
+            document.getElementById('metadataPrompt').textContent = metadataPrompt;
+        });
+        
+        function generarVideoPrompt(tema, publico, tono, duracion, elementosVisuales, plataformas, palabrasClave, objetivo) {
+            return `Como experto en divulgación científica y marketing digital, genera un guion cinematográfico para un video de ${duracion} minutos sobre "${tema}" dirigido a ${publico} con un tono ${tono}. 
+
+Estructura:
+- Formato de guion con tiempo exacto (5 segundo = 1 descripción)
+- Para cada 5 segundo: 1) Narración, 2) Elemento visual (${elementosVisuales}), 3) Fondo con estilo coherente
+- Dividir en bloques de 1.5 minutos máximo
+
+Objetivo: ${objetivo}
+
+Palabras clave: ${palabrasClave}
+Plataforma principal: ${plataformas}
+
+Incluye también:
+- Título llamativo
+- Descripción optimizada para SEO
+- Etiquetas relevantes`;
+        }
+        
+        function generarPostPrompt(tema, publico, tono, elementosVisuales, plataformas, palabrasClave, objetivo) {
+            return `Como community manager especializado en divulgación científica, crea un post para ${plataformas} sobre "${tema}" dirigido a ${publico} con tono ${tono}.
+
+Requerimientos:
+- Título corto y llamativo (máx. 10 palabras)
+- 5 párrafos de 3 a 5 líneas cada uno (máx. 10 palabras por línea)
+- El último párrafo debe ser una reflexión personal
+- Incluir descripción de elementos visuales (${elementosVisuales})
+
+Objetivo: ${objetivo}
+
+Palabras clave: ${palabrasClave}
+
+El post debe:
+- Captar atención inmediata
+- Establecer tono editorial coherente
+- Explicar claramente el tema central
+- Incluir todos los elementos necesarios para publicar en Instagram`;
+        }
+        
+        function generarMetadataPrompt(tema, publico, palabrasClave, objetivo) {
+            return `Genera metadatos completos para contenido sobre "${tema}" dirigido a ${publico}.
+
+Incluye:
+- 5 títulos llamativos (máx. 60 caracteres)
+- 2 descripciones (corta 150 chars, larga 300 chars)
+- 15 hashtags relevantes mezclando populares y específicos
+- Palabras clave para SEO: ${palabrasClave}
+- CTA (llamada a la acción) apropiado
+
+Objetivo del contenido: ${objetivo}
+
+Optimizar para:
+- Máximo engagement
+- Alcance orgánico
+- Conversión según el objetivo`;
+        }
+        
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const message = document.getElementById('successMessage');
+                message.style.display = 'block';
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000);
+            }).catch(err => {
+                console.error('Error al copiar texto: ', err);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Prompts Científicos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-card: #252525;
+            --accent: #6c5ce7;
+            --accent-light: #7869ff;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --border: #333;
+            --success: #00b894;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            background-image: linear-gradient(to bottom right, #121212, #1a1a2e);
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: var(--bg-secondary);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            background: linear-gradient(to right, var(--accent), var(--accent-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .form-section, .results-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            color: var(--accent);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent);
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background-color: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+        
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+        
+        .copy-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: var(--accent-light);
+        }
+        
+        .copy-btn.copied {
+            background: var(--success);
+        }
+        
+        .card-content {
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .card-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .card-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+        
+        .card-content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: var(--accent);
+            color: white;
+            font-size: 0.8rem;
+            margin-right: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 968px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .form-section, .results-section {
+                width: 100%;
+            }
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
+            color: var(--accent);
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Generador de Prompts para Divulgación Científica</h1>
+            <p class="subtitle">Complete el formulario para generar prompts personalizados para artículos, videos y posts de redes sociales</p>
+        </header>
+        
+        <div class="content">
+            <section class="form-section">
+                <h2 class="section-title">Formulario de Configuración</h2>
+                <form id="promptForm">
+                    <div class="form-group">
+                        <label for="tema">Tema principal <span class="badge">Requerido</span></label>
+                        <input type="text" id="tema" name="tema" required placeholder="Ej: Inteligencia Artificial en medicina">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="seccion">Sección de la revista <span class="badge">Requerido</span></label>
+                        <select id="seccion" name="seccion" required>
+                            <option value="">Seleccione una sección</option>
+                            <option value="noticias">Noticias: Actualizaciones rápidas del sector</option>
+                            <option value="reseñas">Reseñas cortas: Críticas de productos/eventos</option>
+                            <option value="perfil">Perfil: Desglose de carrera y aportaciones</option>
+                            <option value="datos">Datos curiosos</option>
+                            <option value="guia">Guía práctica "Tutorial"</option>
+                            <option value="columna">Columna periodística</option>
+                            <option value="investigacion">Artículo de investigación</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tono">Tono de comunicación <span class="badge">Requerido</span></label>
+                        <select id="tono" name="tono" required>
+                            <option value="">Seleccione un tono</option>
+                            <option value="formal">Formal</option>
+                            <option value="coloquial">Coloquial</option>
+                            <option value="divulgativo">Divulgativo</option>
+                            <option value="inspirador">Inspirador</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="publico">Público objetivo</label>
+                        <input type="text" id="publico" name="publico" placeholder="Ej: Estudiantes universitarios">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="palabrasClave">Palabras clave (separadas por coma)</label>
+                        <input type="text" id="palabrasClave" name="palabrasClave" placeholder="Ej: ciencia, tecnología, investigación">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="enfoque">Enfoque o ángulo particular</label>
+                        <textarea id="enfoque" name="enfoque" placeholder="Ej: Aplicaciones prácticas en la vida cotidiana"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="estiloVisual">Estilo visual preferido</label>
+                        <input type="text" id="estiloVisual" name="estiloVisual" placeholder="Ej: Minimalista, Infográfico, Futurista">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="elementosDestacar">Elementos a destacar</label>
+                        <textarea id="elementosDestacar" name="elementosDestacar" placeholder="Ej: Los beneficios para la sociedad"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="llamadoAccion">Llamado a la acción</label>
+                        <input type="text" id="llamadoAccion" name="llamadoAccion" placeholder="Ej: Suscribirse, Comentar, Compartir">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="recursosDisponibles">Recursos disponibles 
+                            <span class="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="tooltiptext">Imágenes, videos, datos estadísticos, etc.</span>
+                            </span>
+                        </label>
+                        <textarea id="recursosDisponibles" name="recursosDisponibles" placeholder="Ej: Imágenes de microscopio, gráficos de estudios recientes"></textarea>
+                    </div>
+                    
+                    <button type="button" id="generarBtn" class="btn">
+                        <i class="fas fa-magic"></i> Generar Prompts
+                    </button>
+                </form>
+            </section>
+            
+            <section class="results-section">
+                <h2 class="section-title">Prompts Generados</h2>
+                <div class="cards-container" id="resultsContainer">
+                    <div class="card placeholder">
+                        <p>Complete el formulario y haga clic en "Generar Prompts" para ver los resultados.</p>
+                    </div>
+                </div>
+                
+                <div class="navigation">
+                    <a href="#" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Anterior
+                    </a>
+                    <a href="#" class="btn">
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </section>
+        </div>
+        
+        <footer>
+            <p>Generador de Prompts para Divulgación Científica &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generarBtn = document.getElementById('generarBtn');
+            const resultsContainer = document.getElementById('resultsContainer');
+            
+            generarBtn.addEventListener('click', function() {
+                // Obtener valores del formulario
+                const tema = document.getElementById('tema').value;
+                const seccion = document.getElementById('seccion').value;
+                const tono = document.getElementById('tono').value;
+                const publico = document.getElementById('publico').value;
+                const palabrasClave = document.getElementById('palabrasClave').value;
+                const enfoque = document.getElementById('enfoque').value;
+                const estiloVisual = document.getElementById('estiloVisual').value;
+                const elementosDestacar = document.getElementById('elementosDestacar').value;
+                const llamadoAccion = document.getElementById('llamadoAccion').value;
+                const recursosDisponibles = document.getElementById('recursosDisponibles').value;
+                
+                // Validar campos obligatorios
+                if (!tema || !seccion || !tono) {
+                    alert('Por favor, complete los campos obligatorios: Tema, Sección y Tono');
+                    return;
+                }
+                
+                // Generar prompts
+                const prompts = generarPrompts({
+                    tema, seccion, tono, publico, palabrasClave, enfoque, 
+                    estiloVisual, elementosDestacar, llamadoAccion, recursosDisponibles
+                });
+                
+                // Mostrar resultados
+                mostrarResultados(prompts);
+            });
+            
+            function generarPrompts(data) {
+                // Mapear nombres de secciones
+                const seccionesMap = {
+                    'noticias': 'Noticias: Actualizaciones rápidas del sector',
+                    'reseñas': 'Reseñas cortas: Críticas de productos/eventos',
+                    'perfil': 'Perfil: Desglose de carrera y aportaciones',
+                    'datos': 'Datos curiosos',
+                    'guia': 'Guía práctica "Tutorial"',
+                    'columna': 'Columna periodística',
+                    'investigacion': 'Artículo de investigación'
+                };
+                
+                // Mapear tonos
+                const tonosMap = {
+                    'formal': 'formal y académico',
+                    'coloquial': 'coloquial y cercano',
+                    'divulgativo': 'divulgativo y accesible',
+                    'inspirador': 'inspirador y motivacional'
+                };
+                
+                // Prompt para artículo
+                const promptArticulo = `ROL: Experto en divulgación científica y marketing digital
+CONTEXTO: Creación de un artículo para la sección "${seccionesMap[data.seccion]}" de una revista especializada
+TAREA: Redactar un artículo científico divulgativo de más de 500 palabras sobre "${data.tema}"
+- Tono: ${tonosMap[data.tono]}
+- Público objetivo: ${data.publico || 'público general interesado en ciencia'}
+- Incluir: ${data.enfoque || 'aspectos relevantes y actualizados del tema'}
+- Elementos a destacar: ${data.elementosDestacar || 'los puntos más importantes'}
+- Palabras clave: ${data.palabrasClave || 'ciencia, divulgación, investigación'}
+
+FORMATO: Texto estructurado con introducción, desarrollo y conclusión. Incluir titulares atractivos y lenguaje accesible pero preciso. Utilizar ejemplos y analogías para facilitar la comprensión.`;
+                
+                // Prompt para video
+                const promptVideo = `ROL: Especialista en contenido audiovisual para redes sociales
+CONTEXTO: Creación de un video de divulgación científica sobre "${data.tema}"
+TAREA: Generar un guion para video de YouTube de 1.5 minutos con formato cinematográfico
+- Tono: ${tonosMap[data.tono]}
+- Estilo visual: ${data.estiloVisual || 'clean y moderno con elementos gráficos explicativos'}
+- Estructura: Por cada segundo, especificar:
+  1. Texto de narración
+  2. Elemento gráfico relacionado con una palabra clave de la narración
+  3. Fondo con estilo visual coherente
+
+INCLUIR TAMBIÉN:
+- Título llamativo para YouTube
+- Descripción optimizada para SEO
+- Hashtags relevantes: ${data.palabrasClave ? data.palabrasClave.split(',').map(k => `#${k.trim()}`).join(' ') : '#Ciencia #Divulgación'}
+- Llamado a la acción: ${data.llamadoAccion || 'Suscríbete para más contenido científico'}
+- Recursos disponibles: ${data.recursosDisponibles || 'Ilustraciones y gráficos genéricos'}`;
+                
+                // Prompt para post
+                const promptPost = `ROL: Community Manager especializado en divulgación científica
+CONTEXTO: Creación de un post para Instagram sobre "${data.tema}"
+TAREA: Redactar una publicación de 5 párrafos breves (3-5 líneas cada uno, máximo 10 palabras por línea)
+- Tono: ${tonosMap[data.tono]}
+- Estructura:
+  * Párrafo 1: Introducción llamativa
+  * Párrafos 2-4: Desarrollo del contenido central
+  * Párrafo 5: Reflexión personal del autor
+- Incluir título corto y atractivo
+- Elementos visuales: ${data.recursosDisponibles || 'Ilustración relacionada con el tema'}
+- Hashtags: ${data.palabrasClave ? data.palabrasClave.split(',').map(k => `#${k.trim()}`).join(' ') : '#Ciencia #Divulgación'}
+
+FUNCIÓN: Capturar atención y establecer tono editorial explicando el tema central.`;
+                
+                return {
+                    articulo: promptArticulo,
+                    video: promptVideo,
+                    post: promptPost
+                };
+            }
+            
+            function mostrarResultados(prompts) {
+                resultsContainer.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-file-alt"></i> Prompt para Artículo</span>
+                            <button class="copy-btn" data-content="${encodeURIComponent(prompts.articulo)}">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                        <div class="card-content">${prompts.articulo}</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-video"></i> Prompt para Video</span>
+                            <button class="copy-btn" data-content="${encodeURIComponent(prompts.video)}">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                        <div class="card-content">${prompts.video}</div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-hashtag"></i> Prompt para Post</span>
+                            <button class="copy-btn" data-content="${encodeURIComponent(prompts.post)}">
+                                <i class="fas fa-copy"></i> Copiar
+                            </button>
+                        </div>
+                        <div class="card-content">${prompts.post}</div>
+                    </div>
+                `;
+                
+                // Agregar event listeners a los botones de copiar
+                document.querySelectorAll('.copy-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const content = decodeURIComponent(this.getAttribute('data-content'));
+                        navigator.clipboard.writeText(content).then(() => {
+                            const originalText = this.innerHTML;
+                            this.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                            this.classList.add('copied');
+                            
+                            setTimeout(() => {
+                                this.innerHTML = originalText;
+                                this.classList.remove('copied');
+                            }, 2000);
+                        }).catch(err => {
+                            console.error('Error al copiar: ', err);
+                            alert('No se pudo copiar el texto. Por favor, inténtalo de nuevo.');
+                        });
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

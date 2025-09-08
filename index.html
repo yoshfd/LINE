@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control Futurista</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --main-bg-color: #0a0e17;
+            --panel-bg-color: #121827;
+            --accent-color: #00a2ff;
+            --secondary-accent: #7e42ff;
+            --text-color: #e0e0e0;
+            --node-color: #1a2436;
+            --node-hover: #243143;
+            --glow-effect: 0 0 10px var(--accent-color), 0 0 20px rgba(0, 162, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--main-bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(7, 25, 52, 0.4) 0%, transparent 20%),
+                radial-gradient(circle at 90% 60%, rgba(126, 66, 255, 0.3) 0%, transparent 30%);
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            grid-column: 1 / span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(94, 94, 94, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            text-shadow: var(--glow-effect);
+        }
+
+        .logo i {
+            color: var(--accent-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+        a {
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+}
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        nav a:hover {
+            color: var(--accent-color);
+            box-shadow: var(--glow-effect);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-color);
+        }
+
+        h2 i {
+            font-size: 1.3rem;
+        }
+
+        .map-section, .control-section {
+            background-color: var(--panel-bg-color);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(94, 94, 94, 0.2);
+            margin-top: 20px;
+        }
+
+        .map-section {
+            grid-column: 1;
+        }
+
+        .control-section {
+            grid-column: 2;
+        }
+
+        .concept-map {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 15px;
+            height: 500px;
+        }
+
+        .node {
+            background-color: var(--node-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(94, 94, 94, 0.3);
+        }
+
+        .node:hover {
+            transform: translateY(-5px);
+            background-color: var(--node-hover);
+            box-shadow: var(--glow-effect);
+            border-color: var(--accent-color);
+        }
+
+        .node i {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .node:nth-child(2n) i {
+            color: var(--secondary-accent);
+        }
+
+        .node-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .node-desc {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .node::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+            opacity: 0.1;
+            top: -50px;
+            left: -50px;
+            z-index: 0;
+        }
+
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .control-item {
+            background-color: var(--node-color);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(94, 94, 94, 0.3);
+        }
+
+        .control-item:hover {
+            transform: translateY(-3px);
+            background-color: var(--node-hover);
+            box-shadow: var(--glow-effect);
+            border-color: var(--accent-color);
+        }
+
+        .control-item i {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .control-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .control-desc {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .connections {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .line {
+            position: absolute;
+            background: linear-gradient(to right, var(--accent-color), var(--secondary-accent));
+            height: 2px;
+            transform-origin: 0 0;
+        }
+
+        footer {
+            grid-column: 1 / span 2;
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(94, 94, 94, 0.3);
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            header, .map-section, .control-section, footer {
+                grid-column: 1;
+            }
+            
+            .concept-map {
+                height: auto;
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .concept-map {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .concept-map {
+                grid-template-columns: 1fr;
+            }
+            
+            nav ul {
+                gap: 10px;
+            }
+            
+            nav a {
+                padding: 5px 8px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-brain-circuit"></i>
+                <span>LINE CONTROL</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li><a href="#"><i class="fas fa-network-wired"></i> Nodos</a></li>
+                    <li><a href="#"><i class="fas fa-sliders-h"></i> Controles</a></li>
+                    <li><a href="#"><i class="fas fa-cog"></i> Configuración</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="map-section">
+            <h2><i class="fas fa-project-diagram"></i> Mapa Clases Interactivo</h2>
+            <div class="concept-map">
+
+<a href="curso_estructura.html">
+                <div class="node" >
+                    <i class="fas fa-server"></i>
+                    <div class="node-title">Estructura del Curso </div>
+                    <div class="node-desc">Núcleo del sistema</div>
+                </div>
+              </a>
+
+              <a href="clases_teoricas.html">
+                <div class="node">
+                    <i class="fas fa-database"></i>
+                    <div class="node-title">Clases teoricas</div>
+                    <div class="node-desc">Almacenamiento principal</div>
+                </div>
+</a>
+
+                <div class="node">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="node-title">Seguridad</div>
+                    <div class="node-desc">Sistema de protección</div>
+                </div>
+                <div class="node">
+                    <i class="fas fa-robot"></i>
+                    <div class="node-title">Automatización</div>
+                    <div class="node-desc">Procesos automáticos</div>
+                </div>
+                <div class="node">
+                    <i class="fas fa-chart-line"></i>
+                    <div class="node-title">Analítica</div>
+                    <div class="node-desc">Análisis de datos</div>
+                </div>
+                <div class="node">
+                    <i class="fas fa-cloud"></i>
+                    <div class="node-title">Nube</div>
+                    <div class="node-desc">Servicios cloud</div>
+                </div>
+                <div class="node">
+                    <i class="fas fa-code"></i>
+                    <div class="node-title">Desarrollo</div>
+                    <div class="node-desc">Entorno de desarrollo</div>
+                </div>
+                <div class="node">
+                    <i class="fas fa-users"></i>
+                    <div class="node-title">Usuarios</div>
+                    <div class="node-desc">Gestión de usuarios</div>
+                </div>
+                <div class="node">
+                    <i class="fas fa-sync-alt"></i>
+                    <div class="node-title">Sincronización</div>
+                    <div class="node-desc">Sync multi-dispositivo</div>
+                </div>
+
+
+                
+            </div>
+        </section>
+
+        <section class="control-section">
+            <h2><i class="fas fa-sliders-h"></i> Centro de Control de Revista</h2>
+
+            <div class="control-panel">
+
+<a href="">
+                <div class="control-item">
+                    <i class="fas fa-power-off"></i>
+                    <div class="control-title">Encender Sistema</div>
+                    <div class="control-desc">Activa todos los módulos</div>
+                </div>
+</a>
+
+<a href="art_revista.html">
+                <div class="control-item">
+                    <i class="fas fa-cogs"></i>
+                    <div class="control-title">Generador de Articulos </div>
+                    <div class="control-desc">Configuración del sistema</div>
+                </div>
+</a>
+
+                <div class="control-item">
+                    <i class="fas fa-bell"></i>
+                    <div class="control-title">Notificaciones</div>
+                    <div class="control-desc">Alertas del sistema</div>
+                </div>
+                <div class="control-item">
+                    <i class="fas fa-history"></i>
+                    <div class="control-title">Historial</div>
+                    <div class="control-desc">Registro de actividad</div>
+                </div>
+                <div class="control-item">
+                    <i class="fas fa-palette"></i>
+                    <div class="control-title">Apariencia</div>
+                    <div class="control-desc">Personalizar interfaz</div>
+                </div>
+                <div class="control-item">
+                    <i class="fas fa-lock"></i>
+                    <div class="control-title">Privacidad</div>
+                    <div class="control-desc">Configuración de seguridad</div>
+                </div>
+            </div>
+        </section>
+        
+
+        <footer>
+            <p>NEXUS CONTROL SYSTEM © 2025 | Diseño futurista con funcionalidades avanzadas</p>
+        </footer>
+    </div>
+
+    <script>
+        // Efectos de iluminación al pasar el cursor
+        document.querySelectorAll('.node, .control-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.boxShadow = '0 0 15px rgba(0, 162, 255, 0.7), 0 0 25px rgba(0, 162, 255, 0.4)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.boxShadow = '';
+            });
+        });
+
+        // Redirección al hacer clic (ejemplo)
+        document.querySelectorAll('.node').forEach(node => {
+            node.addEventListener('click', () => {
+                const title = node.querySelector('.node-title').textContent;
+                alert(`Navegando a: ${title}\n(En una implementación real, esto redirigiría a otra página)`);
+            });
+        });
+    </script>
+</body>
+</html>
